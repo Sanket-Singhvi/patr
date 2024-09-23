@@ -1,15 +1,11 @@
-#[cfg(not(target_arch = "wasm32"))]
-mod client;
-
-#[cfg(not(target_arch = "wasm32"))]
-pub use self::client::*;
-
 /// The alignment enum. This enum is used to specify the alignment of a
 /// component of left, right, or center.
 mod alignment;
 /// A module containing the custom [`AppRoute`].
 /// The App Route Enum. This Enum is used to specify the route of the app.
 mod app_route;
+/// A module containing the client that is used to make requests to the backend
+mod client;
 /// The color enum. This enum is used to specify the color of a component. These
 /// include the primary and secondary colors of the app.
 mod color;
@@ -36,6 +32,7 @@ mod variant;
 pub use self::{
 	alignment::*,
 	app_route::*,
+	client::*,
 	color::*,
 	ext_traits::*,
 	hooks::*,
