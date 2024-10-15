@@ -24,7 +24,6 @@ headers = { workspace = true, features = [] }
 hex = { workspace = true, features = ["default"] }
 http = { workspace = true, features = ["default"] }
 ipnetwork = { workspace = true, features = ["default"] }
-leptos = { workspace = true, features = ["default"] }
 macros = { workspace = true, features = [] }
 preprocess = { workspace = true, features = [] }
 regex = { workspace = true, features = ["default"] }

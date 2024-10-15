@@ -5,7 +5,10 @@ use convert_case::*;
 
 use self::{footer::*, head::*};
 use super::{components::*, utils::*};
-use crate::{prelude::*, queries::list_deployments_query};
+use crate::{
+	prelude::*,
+	queries::{list_deployments_query, AllDeploymentsTag},
+};
 
 /// The Shell Outer for Deployment Page
 #[component]
