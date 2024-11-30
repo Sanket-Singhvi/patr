@@ -18,7 +18,7 @@ pub async fn login(
 	let LoginResponse {
 		access_token,
 		refresh_token,
-	} = make_api_call::<LoginRequest>(
+	} = make_request::<LoginRequest>(
 		ApiRequest::builder()
 			.path(LoginPath)
 			.query(())
@@ -35,7 +35,7 @@ pub async fn login(
 	.await?
 	.body;
 
-	let workspaces = make_api_call::<ListUserWorkspacesRequest>(
+	let workspaces = make_request::<ListUserWorkspacesRequest>(
 		ApiRequest::builder()
 			.path(ListUserWorkspacesPath)
 			.query(())

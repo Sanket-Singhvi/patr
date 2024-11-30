@@ -13,7 +13,7 @@ pub async fn sign_up(
 	username: String,
 	password: String,
 ) -> Result<(), ServerFnError<ErrorType>> {
-	make_api_call::<CreateAccountRequest>(
+	make_request::<CreateAccountRequest>(
 		ApiRequest::builder()
 			.path(CreateAccountPath)
 			.query(())
@@ -80,7 +80,7 @@ pub fn SignUpForm(
 	// 		}
 
 	// 		let Ok(IsEmailValidResponse { available }) =
-	// make_api_call::<IsEmailValidRequest>( 			ApiRequest::builder()
+	// make_request::<IsEmailValidRequest>( 			ApiRequest::builder()
 	// 				.path(IsEmailValidPath)
 	// 				.query(IsEmailValidQuery { email })
 	// 				.headers(IsEmailValidRequestHeaders {
@@ -121,7 +121,7 @@ pub fn SignUpForm(
 	// 		}
 
 	// 		let Ok(IsUsernameValidResponse { available }) =
-	// 			make_api_call::<IsUsernameValidRequest>(
+	// 			make_request::<IsUsernameValidRequest>(
 	// 				ApiRequest::builder()
 	// 					.path(IsUsernameValidPath)
 	// 					.query(IsUsernameValidQuery { username })
