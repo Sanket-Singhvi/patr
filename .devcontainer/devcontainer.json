@@ -6,6 +6,7 @@
 	"updateRemoteUserUID": true,
 	"service": "app",
 	"workspaceFolder": "/workspace",
+	"updateContentCommand": "sudo chown root:docker /var/run/docker.sock",
 	"customizations": {
 		"vscode": {
 			"settings": {

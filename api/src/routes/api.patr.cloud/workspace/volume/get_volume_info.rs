@@ -3,6 +3,8 @@ use models::api::workspace::volume::*;
 
 use crate::prelude::*;
 
+/// Get the information of a volume. This includes the name, size, and the ID of
+/// the deployment that is using the volume.
 pub async fn get_volume_info(
 	AuthenticatedAppRequest {
 		request:

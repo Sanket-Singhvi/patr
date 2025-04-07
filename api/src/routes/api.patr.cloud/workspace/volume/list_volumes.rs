@@ -3,6 +3,7 @@ use models::{api::workspace::volume::*, utils::TotalCountHeader};
 
 use crate::prelude::*;
 
+/// List all the volumes in a workspace.
 pub async fn list_volumes(
 	AuthenticatedAppRequest {
 		request:
@@ -57,14 +58,14 @@ pub async fn list_volumes(
 		OFFSET $3;
 		"#,
 		workspace_id as _,
-		count as i32,
-		(page * count) as i32
+		count.try_into().unwrap_or(i64::MAX),
+		(page * count).try_into().unwrap_or(i64::MAX),
 	)
 	.fetch_all(&mut **database)
 	.await?
 	.into_iter()
 	.map(|row| {
-		total_count = row.total_count;
+		total_count = row.total_count.unsigned_abs();
 		WithId::new(
 			row.id,
 			DeploymentVolume {
@@ -79,7 +80,7 @@ pub async fn list_volumes(
 	AppResponse::builder()
 		.body(ListVolumesInWorkspaceResponse { volumes })
 		.headers(ListVolumesInWorkspaceResponseHeaders {
-			total_count: TotalCountHeader(total_count as _),
+			total_count: TotalCountHeader(total_count),
 		})
 		.status_code(StatusCode::OK)
 		.build()

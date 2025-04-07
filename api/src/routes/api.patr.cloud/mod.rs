@@ -1,5 +1,8 @@
+/// All routes related to authentication.
 mod auth;
+/// All routes related to user data.
 mod user;
+/// All routes related to resources in a workspace.
 mod workspace;
 
 use axum::Router;

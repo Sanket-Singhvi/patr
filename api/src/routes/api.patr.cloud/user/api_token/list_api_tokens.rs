@@ -53,14 +53,14 @@ pub async fn list_api_tokens(
 		OFFSET $3;
 		"#,
 		user_data.id as _,
-		count as i32,
-		(count * page) as i32,
+		count.try_into().unwrap_or(i64::MAX),
+		(count * page).try_into().unwrap_or(i64::MAX),
 	)
 	.fetch_all(&mut **database)
 	.await?
 	.into_iter()
 	.map(|row| {
-		total_count = row.total_count;
+		total_count = row.total_count.unsigned_abs();
 		WithId::new(
 			row.token_id,
 			UserApiToken {
@@ -78,7 +78,7 @@ pub async fn list_api_tokens(
 	AppResponse::builder()
 		.body(ListApiTokensResponse { tokens })
 		.headers(ListApiTokensResponseHeaders {
-			total_count: TotalCountHeader(total_count as _),
+			total_count: TotalCountHeader(total_count),
 		})
 		.status_code(StatusCode::OK)
 		.build()

@@ -5,21 +5,27 @@ use time::{Duration, OffsetDateTime};
 
 use crate::prelude::*;
 
+/// The format of the response from Mimir.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct MimirResponse {
+	/// The data from Mimir.
 	data: MimirData,
 }
 
+/// The data from Mimir.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct MimirData {
+	/// The list of results from Mimir.
 	result: Option<[MimirMatrixResult; 1]>,
 }
 
+/// The matrix result from Mimir.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct MimirMatrixResult {
+	/// The metric values from Mimir.
 	#[serde(rename = "value")]
 	values: Vec<(i128, String)>,
 }

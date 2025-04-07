@@ -9,9 +9,9 @@ pub fn ConfirmSignUpPage() -> impl IntoView {
 	let (_, set_auth_state) = AuthState::load();
 	let confirm_action = create_server_action::<ConfirmOtp>();
 
-	let otp_error = create_rw_signal("".to_owned());
-	let username_error = create_rw_signal("".to_owned());
-	let otp = create_rw_signal("".to_string());
+	let otp_error = RwSignal::new("".to_owned());
+	let username_error = RwSignal::new("".to_owned());
+	let otp = RwSignal::new("".to_string());
 
 	let pending = confirm_action.pending();
 	let response = confirm_action.value();
@@ -28,7 +28,7 @@ pub fn ConfirmSignUpPage() -> impl IntoView {
 		}
 	};
 
-	create_effect(move |_| {
+	Effect::new(move |_| {
 		if let Some(resp) = response.get() {
 			match resp {
 				Ok(CompleteSignUpResponse {
@@ -42,7 +42,7 @@ pub fn ConfirmSignUpPage() -> impl IntoView {
 					}));
 				}
 				Err(err) => {
-					logging::log!("{:#?}", err);
+					info!("{:#?}", err);
 					handle_errors(err);
 				}
 			}
@@ -63,7 +63,7 @@ pub fn ConfirmSignUpPage() -> impl IntoView {
 
 			<ActionForm
 				action={confirm_action}
-				class="flex flex-col items-start justify-start w-full"
+				// class="flex flex-col items-start justify-start w-full"
 			>
 				<Input
 					name="username"

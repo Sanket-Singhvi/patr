@@ -3,6 +3,8 @@ use models::{api::workspace::runner::*, prelude::*};
 
 use crate::prelude::*;
 
+/// This will remove the runner from the workspace and stop any associated
+/// deployments. The runner will no longer be able to access the workspace.
 pub async fn remove_runner_from_workspace(
 	AuthenticatedAppRequest {
 		request:

@@ -1,27 +1,8 @@
-use leptos_router::{Outlet, ProtectedRoute};
+use std::any::Any;
 
-use crate::{prelude::*, utils::AuthState};
+use leptos_router::components::{Outlet, ProtectedParentRoute};
 
-/// The Outer View for Logged In Route
-#[component]
-pub fn LoggedInRoutesView() -> impl IntoView {
-	let (state, _) = AuthState::load();
-
-	move || match state.get() {
-		AuthState::LoggedOut => view! {
-			<PageContainer class="bg-image">
-				<Outlet />
-			</PageContainer>
-		}
-		.into_view(),
-		AuthState::LoggedIn { .. } => view! {
-			<div class="fr-fs-fs full-width full-height bg-secondary">
-				<Outlet />
-			</div>
-		}
-		.into_view(),
-	}
-}
+use crate::prelude::*;
 
 /// Contains all the routes for when the user is logged in
 #[component(transparent)]
@@ -29,14 +10,18 @@ pub fn LoggedInRoutes() -> impl IntoView {
 	let (state, _) = AuthState::load();
 
 	view! {
-		<ProtectedRoute
-			path={AppRoutes::Empty}
-			view={LoggedInRoutesView}
-			redirect_path={AppRoutes::LoggedOutRoute(LoggedOutRoute::Login)}
-			condition={move || state.get().is_logged_in()}
-		>
-			<WorkspacedRoutes />
-			<NotWorkspacedRoutes />
-		</ProtectedRoute>
+		<ProtectedParentRoute
+			path={()}
+			view={|| view! {
+				<div class="fr-fs-fs full-width full-height bg-secondary">
+					<Outlet />
+				</div>
+			}}
+			redirect_path={|| "/login"}
+			condition={|| Some(false)} >
+			// <WorkspacedRoutes />
+			// <NotWorkspacedRoutes />
+			{}
+		</ProtectedParentRoute>
 	}
 }

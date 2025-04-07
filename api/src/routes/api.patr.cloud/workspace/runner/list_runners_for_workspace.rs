@@ -4,6 +4,7 @@ use rustis::commands::{GenericCommands, ScanOptions};
 
 use crate::prelude::*;
 
+/// This will list all the runners that the user has access to in the workspace.
 pub async fn list_runners_for_workspace(
 	AuthenticatedAppRequest {
 		request:
@@ -61,14 +62,14 @@ pub async fn list_runners_for_workspace(
 		workspace_id as _,
 		user_data.login_id as _,
 		Permission::Runner(RunnerPermission::View) as _,
-		count as i32,
-		(count * page) as i32,
+		count.try_into().unwrap_or(i64::MAX),
+		(page * count).try_into().unwrap_or(i64::MAX),
 	)
 	.fetch_all(&mut **database)
 	.await?
 	.into_iter()
 	.map(|row| {
-		total_count = row.total_count;
+		total_count = row.total_count.unsigned_abs();
 		WithId::new(
 			row.id,
 			Runner {
@@ -84,7 +85,7 @@ pub async fn list_runners_for_workspace(
 	AppResponse::builder()
 		.body(ListRunnersForWorkspaceResponse { runners })
 		.headers(ListRunnersForWorkspaceResponseHeaders {
-			total_count: TotalCountHeader(total_count as _),
+			total_count: TotalCountHeader(total_count),
 		})
 		.status_code(StatusCode::OK)
 		.build()

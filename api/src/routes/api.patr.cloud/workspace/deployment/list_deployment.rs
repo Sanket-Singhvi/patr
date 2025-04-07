@@ -63,14 +63,14 @@ pub async fn list_deployment(
 		workspace_id as _,
 		user_data.login_id as _,
 		Permission::Deployment(DeploymentPermission::View) as _,
-		count as i32,
-		(count * page) as i32,
+		count.try_into().unwrap_or(i64::MAX),
+		(count * page).try_into().unwrap_or(i64::MAX),
 	)
 	.fetch_all(&mut **database)
 	.await?
 	.into_iter()
 	.map(|row| {
-		total_count = row.total_count;
+		total_count = row.total_count.unsigned_abs();
 		WithId::new(
 			row.id,
 			Deployment {
@@ -99,7 +99,7 @@ pub async fn list_deployment(
 	AppResponse::builder()
 		.body(ListDeploymentResponse { deployments })
 		.headers(ListDeploymentResponseHeaders {
-			total_count: TotalCountHeader(total_count as _),
+			total_count: TotalCountHeader(total_count),
 		})
 		.status_code(StatusCode::OK)
 		.build()

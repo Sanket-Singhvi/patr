@@ -4,6 +4,8 @@ use time::OffsetDateTime;
 
 use crate::prelude::*;
 
+/// Create a new volume in a workspace. This will create a new volume and
+/// return the ID of the volume.
 pub async fn create_volume(
 	AuthenticatedAppRequest {
 		request:

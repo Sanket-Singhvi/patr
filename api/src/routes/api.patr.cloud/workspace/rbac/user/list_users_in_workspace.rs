@@ -49,14 +49,14 @@ pub async fn list_users_in_workspace(
         OFFSET $3;
         "#,
 		workspace_id as _,
-		count as i64,
-		(count * page) as i64,
+		count.try_into().unwrap_or(i64::MAX),
+		(count * page).try_into().unwrap_or(i64::MAX),
 	)
 	.fetch_all(&mut **database)
 	.await?
 	.into_iter()
 	.fold(BTreeMap::<Uuid, Vec<Uuid>>::new(), |mut users, row| {
-		total_count = row.total_count;
+		total_count = row.total_count.unsigned_abs();
 		users
 			.entry(row.user_id.into())
 			.or_default()
@@ -67,7 +67,7 @@ pub async fn list_users_in_workspace(
 	AppResponse::builder()
 		.body(ListUsersInWorkspaceResponse { users })
 		.headers(ListUsersInWorkspaceResponseHeaders {
-			total_count: TotalCountHeader(total_count as _),
+			total_count: TotalCountHeader(total_count),
 		})
 		.status_code(StatusCode::OK)
 		.build()

@@ -4,6 +4,7 @@ use rustis::commands::StringCommands;
 
 use crate::prelude::*;
 
+/// This will get the information of a runner in the workspace.
 pub async fn get_runner_info(
 	AuthenticatedAppRequest {
 		request:

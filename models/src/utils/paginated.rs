@@ -23,19 +23,19 @@ pub struct Paginated<T = ()> {
 	pub data: T,
 	/// The number of items that should be returned per page.
 	#[serde(default = "default_page_size")]
-	pub count: usize,
+	pub count: u64,
 	/// The page number that should be returned. This is zero-indexed. So to get
 	/// the first page, you should set this to 0, and to get the second page,
 	/// you should set this to 1, etc.
 	#[serde(default)]
-	pub page: usize,
+	pub page: u64,
 }
 
 impl Paginated<()> {
 	/// The default page size that should be used if no page size is specified.
 	/// This is currently set to 25. So if no page size is specified, the API
 	/// will return a maximum of 25 items, starting from the first item.
-	pub const DEFAULT_PAGE_SIZE: usize = 25;
+	pub const DEFAULT_PAGE_SIZE: u64 = 25;
 }
 
 /// Get the default page size that should be used if no page size is
@@ -68,7 +68,7 @@ where
 /// This struct represents the total count of items that are available for the
 /// query. This is used to set the `X-Total-Count` header in the response.
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord)]
-pub struct TotalCountHeader(pub usize);
+pub struct TotalCountHeader(pub u64);
 
 /// A header that is added to the response to indicate the total number of
 /// items that are available for the query (usually for list routes).
@@ -89,7 +89,7 @@ impl Header for TotalCountHeader {
 		let count = value
 			.to_str()
 			.map_err(|_| headers::Error::invalid())?
-			.parse::<usize>()
+			.parse()
 			.map_err(|_| headers::Error::invalid())?;
 
 		Ok(Self(count))

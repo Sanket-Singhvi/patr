@@ -1,49 +1,33 @@
 #[cfg(not(target_arch = "wasm32"))]
+/// The client module. This module contains the client that is used to make
+/// requests to the server as well as internal requests to the backend.
 mod client;
 
 #[cfg(not(target_arch = "wasm32"))]
 pub use self::client::*;
-
-/// The alignment enum. This enum is used to specify the alignment of a
-/// component of left, right, or center.
-mod alignment;
-/// A module containing the custom [`AppRoute`].
-/// The App Route Enum. This Enum is used to specify the route of the app.
-mod app_route;
+// /// The alignment enum. This enum is used to specify the alignment of a
+// /// component of left, right, or center.
+// mod alignment;
+// /// A module containing the custom [`AppRoute`].
+// /// The App Route Enum. This Enum is used to specify the route of the app.
+// mod app_route;
 /// The color enum. This enum is used to specify the color of a component. These
 /// include the primary and secondary colors of the app.
 mod color;
-/// A module containing extension traits for various types
-mod ext_traits;
-mod hooks;
-mod routes;
-mod sidebar_items;
-/// The size enum. This enum is used to specify the size of a component. We
-/// currently have:
-/// - ExtraExtraLarge
-/// - ExtraLarge
-/// - Large
-/// - Medium
-/// - Small
-/// - ExtraSmall
-/// - ExtraExtraSmall
-mod size;
-mod storage;
-/// The variant enum. This enum is used to specify the variant of a component
-/// and the color variant.
-mod variant;
+// /// A module containing extension traits for various types
+// mod ext_traits;
+// /// The size enum. This enum is used to specify the size of a component
+// mod size;
+// /// A module containing the data for app storage
+// mod storage;
 
 pub use self::{
-	alignment::*,
-	app_route::*,
+	// alignment::*,
+	// app_route::*,
 	color::*,
-	ext_traits::*,
-	hooks::*,
-	routes::*,
-	sidebar_items::*,
-	size::*,
-	storage::*,
-	variant::*,
+	// ext_traits::*,
+	// size::*,
+	//  storage::*
 };
 
 /// A module containing constants that are used throughout the application.

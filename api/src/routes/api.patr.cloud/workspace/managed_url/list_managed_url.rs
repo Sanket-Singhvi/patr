@@ -72,14 +72,14 @@ pub async fn list_managed_url(
 		workspace_id as _,
 		user_data.login_id as _,
 		Permission::ManagedURL(ManagedURLPermission::View) as _,
-		count as i32,
-		(count * page) as i32,
+		count.try_into().unwrap_or(i64::MAX),
+		(count * page).try_into().unwrap_or(i64::MAX),
 	)
 	.fetch_all(&mut **database)
 	.await?
 	.into_iter()
 	.map(|row| {
-		total_count = row.total_count;
+		total_count = row.total_count.unsigned_abs();
 		Ok(WithId::new(
 			row.id,
 			ManagedUrl {
@@ -136,7 +136,7 @@ pub async fn list_managed_url(
 	AppResponse::builder()
 		.body(ListManagedURLResponse { urls })
 		.headers(ListManagedURLResponseHeaders {
-			total_count: TotalCountHeader(total_count as _),
+			total_count: TotalCountHeader(total_count),
 		})
 		.status_code(StatusCode::OK)
 		.build()

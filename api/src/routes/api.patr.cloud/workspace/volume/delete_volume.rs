@@ -3,6 +3,9 @@ use models::api::workspace::volume::*;
 
 use crate::prelude::*;
 
+/// Delete a volume. This will delete the volume and all the data in the
+/// volume. This will also remove the volume from any deployments that are
+/// using the volume. This is a destructive operation.
 pub async fn delete_volume(
 	AuthenticatedAppRequest {
 		request:

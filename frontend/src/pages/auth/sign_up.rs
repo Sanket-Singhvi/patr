@@ -1,6 +1,5 @@
 use ev::SubmitEvent;
 use leptos_use::{signal_debounced_with_options, utils::DebounceOptions};
-use models::api::auth::*;
 
 use crate::prelude::*;
 
@@ -51,7 +50,7 @@ pub fn SignUpForm(
 
 	let app_type = expect_context::<AppType>();
 
-	let first_name = create_rw_signal(first_name.unwrap_or_else(|| "".to_owned()));
+	let first_name = RwSignal::new(first_name.unwrap_or_else(|| "".to_owned()));
 	let name_error = Signal::derive(move || {
 		first_name
 			.get()
@@ -60,101 +59,101 @@ pub fn SignUpForm(
 			.unwrap_or_default()
 	});
 
-	let last_name = create_rw_signal(last_name.unwrap_or_else(|| "".to_owned()));
+	let last_name = RwSignal::new(last_name.unwrap_or_else(|| "".to_owned()));
 
-	let email = create_rw_signal(email.unwrap_or_else(|| "".to_owned()));
-	let email_error = create_rw_signal("".to_owned());
-	// let email_checking = create_resource(
-	// 	move || {
-	// 		signal_debounced_with_options(
-	// 			email,
-	// 			constants::DEFAULT_DEBOUNCE_TIME,
-	// 			DebounceOptions::default().max_wait(Some(constants::MAX_DEBOUNCE_TIME)),
-	// 		)
-	// 		.get()
-	// 	},
-	// 	move |email| async move {
-	// 		if email.is_empty() {
-	// 			email_error.set("Email cannot be empty".to_owned());
-	// 			return;
-	// 		}
+	let email = RwSignal::new(email.unwrap_or_else(|| "".to_owned()));
+	let email_error = RwSignal::new("".to_owned());
+	let email_checking = create_resource(
+		move || {
+			signal_debounced_with_options(
+				email,
+				constants::DEFAULT_DEBOUNCE_TIME,
+				DebounceOptions::default().max_wait(Some(constants::MAX_DEBOUNCE_TIME)),
+			)
+			.get()
+		},
+		move |email| async move {
+			if email.is_empty() {
+				email_error.set("Email cannot be empty".to_owned());
+				return;
+			}
 
-	// 		let Ok(IsEmailValidResponse { available }) =
-	// make_api_call::<IsEmailValidRequest>( 			ApiRequest::builder()
-	// 				.path(IsEmailValidPath)
-	// 				.query(IsEmailValidQuery { email })
-	// 				.headers(IsEmailValidRequestHeaders {
-	// 					user_agent: UserAgent::from_static("hyper/0.12.2"),
-	// 				})
-	// 				.body(IsEmailValidRequest)
-	// 				.build(),
-	// 		)
-	// 		.await
-	// 		.map(|response| response.body) else {
-	// 			email_error.set("".to_owned());
-	// 			return;
-	// 		};
+			let Ok(IsEmailValidResponse { available }) = make_api_call::<IsEmailValidRequest>(
+				ApiRequest::builder()
+					.path(IsEmailValidPath)
+					.query(IsEmailValidQuery { email })
+					.headers(IsEmailValidRequestHeaders {
+						user_agent: UserAgent::from_static("hyper/0.12.2"),
+					})
+					.body(IsEmailValidRequest)
+					.build(),
+			)
+			.await
+			.map(|response| response.body) else {
+				email_error.set("".to_owned());
+				return;
+			};
 
-	// 		if !available {
-	// 			email_error.set("User Not Found".to_owned());
-	// 		} else {
-	// 			email_error.set("".to_owned());
-	// 		}
-	// 	},
-	// );
+			if !available {
+				email_error.set("User Not Found".to_owned());
+			} else {
+				email_error.set("".to_owned());
+			}
+		},
+	);
 
-	let username = create_rw_signal(username.unwrap_or_else(|| "".to_owned()));
-	let username_error = create_rw_signal("".to_owned());
-	// let username_checking = create_resource(
-	// 	move || {
-	// 		signal_debounced_with_options(
-	// 			username,
-	// 			constants::DEFAULT_DEBOUNCE_TIME,
-	// 			DebounceOptions::default().max_wait(Some(constants::MAX_DEBOUNCE_TIME)),
-	// 		)
-	// 		.get()
-	// 	},
-	// 	move |username| async move {
-	// 		if username.is_empty() {
-	// 			username_error.set("Username cannot be empty".to_owned());
-	// 			return;
-	// 		}
+	let username = RwSignal::new(username.unwrap_or_else(|| "".to_owned()));
+	let username_error = RwSignal::new("".to_owned());
+	let username_checking = create_resource(
+		move || {
+			signal_debounced_with_options(
+				username,
+				constants::DEFAULT_DEBOUNCE_TIME,
+				DebounceOptions::default().max_wait(Some(constants::MAX_DEBOUNCE_TIME)),
+			)
+			.get()
+		},
+		move |username| async move {
+			if username.is_empty() {
+				username_error.set("Username cannot be empty".to_owned());
+				return;
+			}
 
-	// 		let Ok(IsUsernameValidResponse { available }) =
-	// 			make_api_call::<IsUsernameValidRequest>(
-	// 				ApiRequest::builder()
-	// 					.path(IsUsernameValidPath)
-	// 					.query(IsUsernameValidQuery { username })
-	// 					.headers(IsUsernameValidRequestHeaders {
-	// 						user_agent: UserAgent::from_static("hyper/0.12.2"),
-	// 					})
-	// 					.body(IsUsernameValidRequest)
-	// 					.build(),
-	// 			)
-	// 			.await
-	// 			.map(|response| response.body)
-	// 		else {
-	// 			username_error.set("".to_owned());
-	// 			return;
-	// 		};
+			let Ok(IsUsernameValidResponse { available }) =
+				make_api_call::<IsUsernameValidRequest>(
+					ApiRequest::builder()
+						.path(IsUsernameValidPath)
+						.query(IsUsernameValidQuery { username })
+						.headers(IsUsernameValidRequestHeaders {
+							user_agent: UserAgent::from_static("hyper/0.12.2"),
+						})
+						.body(IsUsernameValidRequest)
+						.build(),
+				)
+				.await
+				.map(|response| response.body)
+			else {
+				username_error.set("".to_owned());
+				return;
+			};
 
-	// 		if !available {
-	// 			username_error.set("User Not Found".to_owned());
-	// 		} else {
-	// 			username_error.set("".to_owned());
-	// 		}
-	// 	},
-	// );
+			if !available {
+				username_error.set("User Not Found".to_owned());
+			} else {
+				username_error.set("".to_owned());
+			}
+		},
+	);
 
-	let password = create_rw_signal("".to_owned());
-	let password_error = create_rw_signal("".to_owned());
+	let password = RwSignal::new("".to_owned());
+	let password_error = RwSignal::new("".to_owned());
 	let password_valid = Signal::derive(move || password.get().len() >= 8);
 
-	let password_confirm = create_rw_signal("".to_owned());
-	let password_confirm_error = create_rw_signal("".to_owned());
+	let password_confirm = RwSignal::new("".to_owned());
+	let password_confirm_error = RwSignal::new("".to_owned());
 	let passwords_match = Signal::derive(move || password.get() != password_confirm.get());
 
-	let loading = create_rw_signal(false);
+	let loading = RwSignal::new(false);
 
 	let on_submit_sign_up = move |ev: SubmitEvent| {
 		ev.prevent_default();

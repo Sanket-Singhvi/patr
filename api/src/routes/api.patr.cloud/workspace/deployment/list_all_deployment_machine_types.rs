@@ -40,8 +40,12 @@ pub async fn machine_type(
 		WithId::new(
 			machine.id,
 			DeploymentMachineType {
-				cpu_count: machine.cpu_count as u16,
-				memory_count: machine.memory_count as u32,
+				cpu_count: machine.cpu_count.unsigned_abs(),
+				memory_count: machine
+					.memory_count
+					.unsigned_abs()
+					.try_into()
+					.unwrap_or(u32::MAX),
 			},
 		)
 	})

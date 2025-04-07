@@ -11,6 +11,9 @@ use rustis::commands::{SetCondition, SetExpiration, StringCommands};
 
 use crate::prelude::*;
 
+/// For a given runner, this handler streams the changes to the workspace
+/// associated with the runner. The runner can use this to reflect the changes
+/// in the workspace in real-time.
 pub async fn stream_runner_data_for_workspace(
 	AuthenticatedAppRequest {
 		request:

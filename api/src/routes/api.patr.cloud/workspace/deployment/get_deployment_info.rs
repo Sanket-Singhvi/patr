@@ -45,7 +45,12 @@ pub async fn get_deployment_info(
 	.fetch_all(&mut **database)
 	.await?
 	.into_iter()
-	.map(|row| (StringifiedU16::new(row.port as u16), row.port_type))
+	.map(|row| {
+		(
+			StringifiedU16::new(row.port.try_into().unwrap_or(0)),
+			row.port_type,
+		)
+	})
 	.collect();
 
 	let environment_variables = query!(
@@ -168,19 +173,19 @@ pub async fn get_deployment_info(
 		),
 		running_details: DeploymentRunningDetails {
 			deploy_on_push: row.deploy_on_push,
-			min_horizontal_scale: row.min_horizontal_scale as u16,
-			max_horizontal_scale: row.max_horizontal_scale as u16,
+			min_horizontal_scale: row.min_horizontal_scale.try_into().unwrap_or(0),
+			max_horizontal_scale: row.max_horizontal_scale.try_into().unwrap_or(0),
 			ports,
 			environment_variables,
 			startup_probe: row.startup_probe_port.zip(row.startup_probe_path).map(
 				|(port, path)| DeploymentProbe {
-					port: port as u16,
+					port: port.try_into().unwrap_or(u16::MAX),
 					path,
 				},
 			),
 			liveness_probe: row.liveness_probe_port.zip(row.liveness_probe_path).map(
 				|(port, path)| DeploymentProbe {
-					port: port as u16,
+					port: port.try_into().unwrap_or(u16::MAX),
 					path,
 				},
 			),

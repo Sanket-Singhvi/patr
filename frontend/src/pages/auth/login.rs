@@ -35,23 +35,27 @@ pub async fn login(
 	.await?
 	.body;
 
-	let workspaces = make_api_call::<ListUserWorkspacesRequest>(
-		ApiRequest::builder()
-			.path(ListUserWorkspacesPath)
-			.query(())
-			.headers(ListUserWorkspacesRequestHeaders {
-				authorization: BearerToken::from_str(&access_token)
-					.map_err(|err| ServerFnError::<ErrorType>::ServerError(err.to_string()))?,
-				user_agent: UserAgent::from_static("hyper/0.12.2"),
-			})
-			.body(ListUserWorkspacesRequest)
-			.build(),
-	)
-	.await?
-	.body
-	.workspaces;
+	let last_used_workspace_id = if expect_context::<AppType>().is_managed() {
+		let workspaces = make_api_call::<ListUserWorkspacesRequest>(
+			ApiRequest::builder()
+				.path(ListUserWorkspacesPath)
+				.query(())
+				.headers(ListUserWorkspacesRequestHeaders {
+					authorization: BearerToken::from_str(&access_token)
+						.map_err(|err| ServerFnError::<ErrorType>::ServerError(err.to_string()))?,
+					user_agent: UserAgent::from_static("hyper/0.12.2"),
+				})
+				.body(ListUserWorkspacesRequest)
+				.build(),
+		)
+		.await?
+		.body
+		.workspaces;
 
-	let last_used_workspace_id = workspaces.into_iter().next().map(|workspace| workspace.id);
+		workspaces.into_iter().next().map(|workspace| workspace.id)
+	} else {
+		Some(Uuid::nil())
+	};
 
 	// TODO: uncomment this when Leptos-use fixes this
 	// set_state.set(Some(AuthState::LoggedIn {
@@ -79,13 +83,13 @@ pub fn LoginForm(
 	let (_, set_state) = AuthState::load();
 	let app_type = expect_context::<AppType>();
 
-	let username = create_rw_signal(user_id.unwrap_or_default());
-	let password = create_rw_signal("".to_owned());
+	let username = RwSignal::new(user_id.unwrap_or_default());
+	let password = RwSignal::new("".to_owned());
 
-	let username_error = create_rw_signal("".to_owned());
-	let password_error = create_rw_signal("".to_owned());
+	let username_error = RwSignal::new("".to_owned());
+	let password_error = RwSignal::new("".to_owned());
 
-	let loading = create_rw_signal(false);
+	let loading = RwSignal::new(false);
 
 	let on_submit_login = move |ev: SubmitEvent| {
 		ev.prevent_default();
@@ -172,7 +176,7 @@ pub fn LoginForm(
 					.some_if_not_empty()
 					.map(|message| view! {
 						<Alert r#type={AlertType::Error} class="mt-xs">
-							{&message}
+							{message.into_view()}
 						</Alert>
 					})}
 
@@ -199,7 +203,7 @@ pub fn LoginForm(
 					.some_if_not_empty()
 					.map(|message| view! {
 						<Alert r#type={AlertType::Error} class="mt-xs">
-							{&message}
+							{message.into_view()}
 						</Alert>
 					})}
 			</div>

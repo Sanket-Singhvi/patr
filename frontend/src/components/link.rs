@@ -1,42 +1,66 @@
+use leptos_router::components::A;
 use web_sys::MouseEvent;
 
-use crate::imports::*;
+use crate::prelude::*;
+
+/// Link Variant
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
+pub enum LinkVariant {
+	/// A Normal Button. To be used with the Link Component
+	#[default]
+	Button,
+	/// A Link. To be used with the Link Component
+	Link,
+}
+
+/// The Type of Link to use. A contained link is a button with a background,
+/// while a plain link looks like an anchor tag.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
+pub enum LinkStyleVariant {
+	/// An Outlined Link. This is a button without a background, but with an
+	/// outline.
+	Outlined,
+	/// A contained link. This is a button with a background.
+	Contained,
+	/// A plain link. This looks like an anchor tag.
+	#[default]
+	Plain,
+}
 
 /// Link component to navigate to other pages
 /// Use the variant prop to switch between <a/> and <button/>
 /// tag
 #[component]
 pub fn Link(
-	/// Specifies which type of button to use,
-	/// "button" or "submit", to be only used with the button variant
+	/// Specifies which type of button to use, "button" or "submit", to be only
+	/// used with the button variant
 	#[prop(into, optional, default = false.into())]
-	should_submit: MaybeSignal<bool>,
+	should_submit: Signal<bool>,
 	/// The Target of the Link, to be used with the link variant
 	#[prop(into, optional)]
-	to: MaybeSignal<String>,
-	/// Click Handler, to be only used with the button variant,
-	/// this NEEDS JavaScript to be enabled.
+	to: Signal<String>,
+	/// Click Handler, to be only used with the button variant, this NEEDS
+	/// JavaScript to be enabled.
 	#[prop(optional)]
-	on_click: Option<ClickHandler>,
-	/// The Children of the Link, usually a \<p\> tag or simply
-	/// the link text
+	on_click: Option<Callback<MouseEvent>>,
+	/// The content of the Link
+	#[prop(default = Arc::new(|| "".into_any()))]
 	children: ChildrenFn,
 	/// Additional class names to apply to the link, if any
 	#[prop(into, optional)]
-	class: MaybeSignal<String>,
+	class: Signal<String>,
 	/// Color of the link
 	#[prop(into, optional)]
-	color: MaybeSignal<Color>,
-	/// Button Variant i.e. a button or a Link,
-	/// Defaults to Button
+	color: Signal<Color>,
+	/// Button Variant i.e. a button or a Link. Defaults to Button
 	#[prop(into, optional)]
-	r#type: MaybeSignal<Variant>,
+	r#type: Signal<LinkVariant>,
 	/// Variant of the Link
 	#[prop(into, optional)]
-	style_variant: MaybeSignal<LinkStyleVariant>,
+	style_variant: Signal<LinkStyleVariant>,
 	/// Whether the button is disabled or not
 	#[prop(into, optional)]
-	disabled: MaybeSignal<bool>,
+	disabled: Signal<bool>,
 ) -> impl IntoView {
 	let class = move || {
 		format!(
@@ -53,36 +77,30 @@ pub fn Link(
 	let on_click = move |e: MouseEvent| {
 		if let Some(click) = &on_click {
 			e.prevent_default();
-			click(&e);
+			click.run(e);
 		}
 	};
 
-	let to = store_value(to);
-	let children = store_value(children);
+	let to = StoredValue::new(to);
+	let children = StoredValue::new(children);
 
-	view! {
-		{move || match r#type.get() {
-			Variant::Link => {
-				view! {
-					<A href={move || to.with_value(|val| val.get())} class={class.clone()}>
-						{children.with_value(|val| val())}
-					</A>
-				}
-					.into_view()
-			}
-			Variant::Button => {
-				view! {
-					<button
-						type={if should_submit.get() { "submit" } else { "button" }}
-						on:click={on_click.clone()}
-						disabled={move || disabled.get()}
-						class={class.clone()}
-					>
-						{children.with_value(|val| val())}
-					</button>
-				}
-					.into_view()
-			}
-		}}
+	move || match r#type.get() {
+		LinkVariant::Link => Either::Left(view! {
+			<div class={class}>
+				<A href={move || to.with_value(|val| val.get())}>
+					{children.with_value(|val| val())}
+				</A>
+			</div>
+		}),
+		LinkVariant::Button => Either::Right(view! {
+			<button
+				type={if should_submit.get() { "submit" } else { "button" }}
+				on:click={on_click}
+				disabled={move || disabled.get()}
+				class={class}
+			>
+				{children.with_value(|val| val())}
+			</button>
+		}),
 	}
 }

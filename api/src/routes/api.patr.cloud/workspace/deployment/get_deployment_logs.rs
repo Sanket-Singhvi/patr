@@ -5,21 +5,27 @@ use time::OffsetDateTime;
 
 use crate::prelude::*;
 
+/// The response format from Loki when getting logs.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct LokiResponse {
+	/// The data from Loki.
 	data: LokiData,
 }
 
+/// The data from Loki.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct LokiData {
+	/// The list of results from Loki.
 	result: Vec<LokiMatrixResult>,
 }
 
+/// The matrix result from Loki.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct LokiMatrixResult {
+	/// The log values from Loki, with the timestamp and log message.
 	values: Vec<(i128, String)>,
 }
 

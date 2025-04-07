@@ -10,7 +10,12 @@ mod is_username_valid;
 mod list_recovery_options;
 mod login;
 mod logout;
-#[expect(unused_variables)]
+#[allow(
+	unreachable_code,
+	unused_variables,
+	clippy::missing_docs_in_private_items,
+	missing_docs
+)]
 mod oauth;
 mod renew_access_token;
 mod resend_otp;

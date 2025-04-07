@@ -1,11 +1,11 @@
-use crate::imports::*;
+use crate::prelude::*;
 
-/// A Single Page container, typically used for LoggedOut set of Routes
+/// A single page container, typically used for logged out Routes
 #[component]
 pub fn PageContainer(
-	/// Additional classnames to appy to the outer div, if any
+	/// Additional class names to apply to the outer div, if any
 	#[prop(into, optional)]
-	class: MaybeSignal<String>,
+	class: Signal<String>,
 	/// The contents of the page
 	children: Children,
 ) -> impl IntoView {
@@ -18,7 +18,9 @@ pub fn PageContainer(
 
 	view! {
 		<div class={class}>
-			<main class="flex flex-col items-center justify-center w-full px-lg">{children()}</main>
+			<main class="flex flex-col items-center justify-center w-full px-lg">
+				{children()}
+			</main>
 		</div>
 	}
 }

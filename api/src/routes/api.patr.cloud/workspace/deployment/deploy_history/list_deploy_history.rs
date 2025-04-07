@@ -70,14 +70,14 @@ pub async fn list_deploy_history(
 		OFFSET $3;
 		"#,
 		deployment_id as _,
-		count as i32,
-		(page & count) as i32
+		count.try_into().unwrap_or(i64::MAX),
+		(page * count).try_into().unwrap_or(i64::MAX)
 	)
 	.fetch_all(&mut **database)
 	.await?
 	.into_iter()
 	.map(|row| {
-		total_count = row.total_count;
+		total_count = row.total_count.unsigned_abs();
 		DeploymentDeployHistory {
 			image_digest: row.image_digest,
 			created: row.created,
@@ -88,7 +88,7 @@ pub async fn list_deploy_history(
 	AppResponse::builder()
 		.body(ListDeploymentDeployHistoryResponse { deploys })
 		.headers(ListDeploymentDeployHistoryResponseHeaders {
-			total_count: TotalCountHeader(total_count as _),
+			total_count: TotalCountHeader(total_count),
 		})
 		.status_code(StatusCode::OK)
 		.build()

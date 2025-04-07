@@ -50,14 +50,14 @@ pub async fn list_users_for_role(
         OFFSET $3;
         "#,
 		workspace_id as _,
-		count as i64,
-		(page * count) as i64,
+		count.try_into().unwrap_or(i64::MAX),
+		(page * count).try_into().unwrap_or(i64::MAX),
 	)
 	.fetch_all(&mut **database)
 	.await?
 	.into_iter()
 	.map(|row| {
-		total_count = row.total_count;
+		total_count = row.total_count.unsigned_abs();
 		row.user_id.into()
 	})
 	.collect();
@@ -65,7 +65,7 @@ pub async fn list_users_for_role(
 	AppResponse::builder()
 		.body(ListUsersForRoleResponse { users })
 		.headers(ListUsersForRoleResponseHeaders {
-			total_count: TotalCountHeader(total_count as _),
+			total_count: TotalCountHeader(total_count),
 		})
 		.status_code(StatusCode::OK)
 		.build()

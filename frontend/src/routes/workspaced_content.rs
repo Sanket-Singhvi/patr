@@ -1,6 +1,6 @@
 use leptos_router::{Outlet, ProtectedRoute};
 
-use crate::{pages::*, prelude::*, queries::list_workspaces_query, utils::AuthState};
+use crate::{prelude::*, queries::list_workspaces_query, utils::AuthState};
 
 /// The view for the Workspaced Routes
 #[component]
@@ -45,7 +45,7 @@ pub fn WorkspacedRoutes() -> impl IntoView {
 						last_used_workspace_id: first_id.clone(),
 					},
 				};
-				logging::log!("{:?}", new_state);
+				info!("{:?}", new_state);
 				set_state.set(Some(new_state));
 				// set_current_workspace.set(first_id.map(|x| x.to_string()));
 

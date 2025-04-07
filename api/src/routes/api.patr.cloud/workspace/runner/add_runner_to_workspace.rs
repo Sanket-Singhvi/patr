@@ -3,6 +3,8 @@ use models::{api::workspace::runner::*, prelude::*};
 
 use crate::prelude::*;
 
+/// This will add a runner to the workspace. The runner will be able to access
+/// the workspace and deploy applications.
 pub async fn add_runner_to_workspace(
 	AuthenticatedAppRequest {
 		request:

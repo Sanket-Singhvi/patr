@@ -15,15 +15,19 @@ use tokio_tungstenite::tungstenite::{Message as RawMessage, client::IntoClientRe
 
 use crate::prelude::*;
 
+/// The response format from Loki when streaming logs.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct LokiResponse {
+	/// The streams of logs from Loki.
 	streams: LokiStreams,
 }
 
+/// The streams of logs from Loki.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct LokiStreams {
+	/// The actual log values.
 	values: Vec<(i128, String)>,
 }
 

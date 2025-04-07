@@ -1,4 +1,4 @@
-use leptos_router::{Outlet, ProtectedRoute, Route, Router, Routes};
+use leptos_router::components::{Router, Routes};
 
 use crate::{pages::*, prelude::*, utils::AuthState};
 
@@ -66,76 +66,76 @@ fn RunnerWorkspaceRoutes() -> impl IntoView {
 /// application. It contains the main router and all the routes.
 #[component]
 pub fn App() -> impl IntoView {
-	let (state, _) = AuthState::load();
-	let app_type = AppType::Managed;
+	// let app_type = AppType::Managed;
 
 	// TODO: When redirecting to login, the URL should include the path that the
 	// user was trying to access. This way, after login, the user is redirected
 	// to the page they were trying to access.
-	provide_context(app_type);
-	provide_toaster();
 
 	view! {
-		<Toaster />
-
-		<Router>
-			<Routes>
-				// Logged in routes
-				<ProtectedRoute
-					path={AppRoutes::Empty}
-					view={AppOutlet}
-					redirect_path={AppRoutes::LoggedOutRoute(LoggedOutRoute::Login)}
-					condition={move || state.get().is_logged_in()}
-				>
-					<ProfileRoutes />
-					<InfrastructureRoutes />
-					<Route path={LoggedInRoute::ManagedUrl} view={ManagedUrlPage}>
-						<Route path="create" view={|| view! { <div>"create"</div> }} />
-						<Route path={AppRoutes::Empty} view={UrlDashboard} />
-					</Route>
-					<Route path={LoggedInRoute::Domain} view={DomainsDashboard} />
-					{app_type.is_managed().then(RunnerWorkspaceRoutes)}
-					<Route
+			<Router>
+	<<<<<<< HEAD
+				<Routes>
+					// Logged in routes
+					<ProtectedRoute
 						path={AppRoutes::Empty}
-						view={HomePage}
-					/>
-				</ProtectedRoute>
-				<ProtectedRoute
-					path={"".to_string()}
-					redirect_path={AppRoutes::LoggedInRoute(LoggedInRoute::Home).to_string()}
-					view={AppOutlet}
-					condition={move || state.get().is_logged_out()}
-				>
-					<AppRoute<LoginRoute, _, _> view={|query, _| LoginForm(LoginFormProps { query })} />
-					<AppRoute<SignUpRoute, _, _> view={|query, _| SignUpForm(SignUpFormProps { query })} />
-					{app_type
-						.is_managed()
-						.then(|| {
-							view! { <Route path="/confirm" view={ConfirmSignUpPage} /> }
-						})}
-				</ProtectedRoute>
-				<Route
-					path="/*any"
-					view={|| {
-						view! {
-							<ErrorPage
-								title="Page Not Found"
-								content={
-									view! {
-										<Link
-											r#type={Variant::Link}
-											style_variant={LinkStyleVariant::Contained}
-											to="/"
-										>
-											"Go to Home"
-										</Link>
+						view={AppOutlet}
+						redirect_path={AppRoutes::LoggedOutRoute(LoggedOutRoute::Login)}
+						condition={move || state.get().is_logged_in()}
+					>
+						<ProfileRoutes />
+						<InfrastructureRoutes />
+						<Route path={LoggedInRoute::ManagedUrl} view={ManagedUrlPage}>
+							<Route path="create" view={|| view! { <div>"create"</div> }} />
+							<Route path={AppRoutes::Empty} view={UrlDashboard} />
+						</Route>
+						<Route path={LoggedInRoute::Domain} view={DomainsDashboard} />
+						{app_type.is_managed().then(RunnerWorkspaceRoutes)}
+						<Route
+							path={AppRoutes::Empty}
+							view={HomePage}
+						/>
+					</ProtectedRoute>
+					<ProtectedRoute
+						path={"".to_string()}
+						redirect_path={AppRoutes::LoggedInRoute(LoggedInRoute::Home).to_string()}
+						view={AppOutlet}
+						condition={move || state.get().is_logged_out()}
+					>
+						<AppRoute<LoginRoute, _, _> view={|query, _| LoginForm(LoginFormProps { query })} />
+						<AppRoute<SignUpRoute, _, _> view={|query, _| SignUpForm(SignUpFormProps { query })} />
+						{app_type
+							.is_managed()
+							.then(|| {
+								view! { <Route path="/confirm" view={ConfirmSignUpPage} /> }
+							})}
+					</ProtectedRoute>
+					<Route
+						path="/*any"
+						view={|| {
+							view! {
+								<ErrorPage
+									title="Page Not Found"
+									content={
+										view! {
+											<Link
+												r#type={Variant::Link}
+												style_variant={LinkStyleVariant::Contained}
+												to="/"
+											>
+												"Go to Home"
+											</Link>
+										}
 									}
-								}
-							/>
-						}
-					}}
-				/>
-			</Routes>
-		</Router>
-	}
+								/>
+							}
+						}}
+					/>
+	=======
+				<Routes fallback={NotFoundPage}>
+					{}
+	>>>>>>> da57a00a (Added a whole bunch of docs. WIP upgrade to leptos 0.7)
+				</Routes>
+			</Router>
+		}
 }

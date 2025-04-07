@@ -1,4 +1,4 @@
-use crate::{pages::*, prelude::*};
+use crate::prelude::*;
 
 /// Not Workspaced Routes, For example Profile or Workspace Routes.
 /// Ideally used only when there is not a single workspace present
