@@ -73,69 +73,10 @@ pub fn App() -> impl IntoView {
 	// to the page they were trying to access.
 
 	view! {
-			<Router>
-	<<<<<<< HEAD
-				<Routes>
-					// Logged in routes
-					<ProtectedRoute
-						path={AppRoutes::Empty}
-						view={AppOutlet}
-						redirect_path={AppRoutes::LoggedOutRoute(LoggedOutRoute::Login)}
-						condition={move || state.get().is_logged_in()}
-					>
-						<ProfileRoutes />
-						<InfrastructureRoutes />
-						<Route path={LoggedInRoute::ManagedUrl} view={ManagedUrlPage}>
-							<Route path="create" view={|| view! { <div>"create"</div> }} />
-							<Route path={AppRoutes::Empty} view={UrlDashboard} />
-						</Route>
-						<Route path={LoggedInRoute::Domain} view={DomainsDashboard} />
-						{app_type.is_managed().then(RunnerWorkspaceRoutes)}
-						<Route
-							path={AppRoutes::Empty}
-							view={HomePage}
-						/>
-					</ProtectedRoute>
-					<ProtectedRoute
-						path={"".to_string()}
-						redirect_path={AppRoutes::LoggedInRoute(LoggedInRoute::Home).to_string()}
-						view={AppOutlet}
-						condition={move || state.get().is_logged_out()}
-					>
-						<AppRoute<LoginRoute, _, _> view={|query, _| LoginForm(LoginFormProps { query })} />
-						<AppRoute<SignUpRoute, _, _> view={|query, _| SignUpForm(SignUpFormProps { query })} />
-						{app_type
-							.is_managed()
-							.then(|| {
-								view! { <Route path="/confirm" view={ConfirmSignUpPage} /> }
-							})}
-					</ProtectedRoute>
-					<Route
-						path="/*any"
-						view={|| {
-							view! {
-								<ErrorPage
-									title="Page Not Found"
-									content={
-										view! {
-											<Link
-												r#type={Variant::Link}
-												style_variant={LinkStyleVariant::Contained}
-												to="/"
-											>
-												"Go to Home"
-											</Link>
-										}
-									}
-								/>
-							}
-						}}
-					/>
-	=======
-				<Routes fallback={NotFoundPage}>
-					{}
-	>>>>>>> da57a00a (Added a whole bunch of docs. WIP upgrade to leptos 0.7)
-				</Routes>
-			</Router>
-		}
+		<Router>
+			<Routes fallback={NotFoundPage}>
+				{}
+			</Routes>
+		</Router>
+	}
 }
