@@ -1,9 +1,11 @@
 /// The Deployment Components, such as the Deployment Card, inputs, etc.
 mod components;
+/// The Deployment Create Page
+mod create;
 /// The Deployment Dashboard Page
 mod dashboard;
 
-pub use self::dashboard::*;
+pub use self::{create::*, dashboard::*};
 use crate::prelude::*;
 
 /// Temporary Page Container
