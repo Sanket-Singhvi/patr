@@ -11,7 +11,7 @@ pub fn App(
 
 	view! {
 		<TempPageContainer>
-			<DeploymentDashboard />
+			<CreateDeployment />
 		</TempPageContainer>
 	}
 }
