@@ -2,9 +2,10 @@ use crate::prelude::*;
 
 mod details;
 mod head;
+mod running;
 mod scale;
 
-pub use self::{details::*, head::*, scale::*};
+pub use self::{details::*, head::*, running::*, scale::*};
 
 /// The Create Deployment Page
 #[component]
@@ -15,7 +16,8 @@ pub fn CreateDeployment() -> impl IntoView {
 
 			<ContainerBody class="gap-md overflow-y-auto px-md">
 				<DeploymentDetails />
-				// <ScaleDeployment />
+				<RunningDetails />
+				<ScaleDeployment />
 
 				<div class="flex justify-end items-center gap-md w-full fit-wide-screen mx-auto mt-auto pt-md pb-xl px-md">
 					<button

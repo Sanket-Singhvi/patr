@@ -8,7 +8,7 @@ pub mod prelude {
 	pub use leptos_router::*;
 	pub use leptos_use::use_cookie;
 	// pub use models::prelude::*;
-	pub use models::prelude::Uuid;
+	pub use models::prelude::*;
 
 	pub use crate::{components::*, pages::*, utils::*};
 }

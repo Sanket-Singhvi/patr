@@ -1,5 +1,7 @@
 use crate::prelude::*;
 
+/// Deployment Head Component, contains the title, description and CTA to create
+/// deployment
 #[component]
 pub fn CreateDeploymentHead() -> impl IntoView {
 	view! {

@@ -4,15 +4,17 @@ use crate::prelude::*;
 #[component]
 pub fn ScaleDeployment() -> impl IntoView {
 	view! {
-		<div class="fc-fs-fs w-full px-xl mt-xl text-white text-sm fit-wide-screen mx-auto gap-md">
+		<div class="flex flex-col items-start justify-start w-full px-xl mt-xl text-white text-sm fit-wide-screen mx-auto gap-md">
 			<h4 class="text-white text-lg pb-md">"Scale Your Servers"</h4>
 
 			<div class="flex w-full">
-				<div class="flex-2 my-auto pr-md">
+				<div class="w-1/6 my-auto">
 					<span class="text-sm">"Choose Horizontal Scale"</span>
 				</div>
 
-				<div class="flex-10 flex flex-col justify-start items-start bg-secondary-light p-xl br-sm gap-md">
+				<div class="w-5/6 flex flex-col justify-start items-start
+					bg-secondary-light p-xl br-sm gap-md rounded-sm"
+				>
 					<p class="w-full tracking-[1px] text-xxs">
 						"Choose the minimum and maximum number of instances for your deployment "
 					</p>
@@ -40,11 +42,11 @@ pub fn ScaleDeployment() -> impl IntoView {
 			</div>
 
 			<div class="flex w-full">
-				<div class="flex-2 my-auto pr-md">
+				<div class="w-1/6 my-auto">
 					<span class="text-sm">"Manage Resource Allocation"</span>
 				</div>
 
-				<div class="flex-10 flex justify-start items-center overflow-auto">
+				<div class="w-5/6 flex justify-start items-center overflow-auto">
 					<div class="w-full p-xl rounded-sm bg-secondary-light flex flex-col items-start justify-start overflow-auto">
 						<p class="tracking-[1px] mb-lg text-xxs">
 							"Specify the resources to be allocated to your container"

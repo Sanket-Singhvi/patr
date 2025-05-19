@@ -4,12 +4,12 @@ use crate::prelude::*;
 #[component]
 pub fn DeploymentDetails() -> impl IntoView {
 	view! {
-		<div class="flex flex-col items-start justify-start w-full fit-wide-screen px-xl mt-xl">
+		<div class="flex flex-col items-start justify-start gap-md w-full fit-wide-screen px-xl mt-xl">
 			<h4 class="text-white text-lg pb-md">"Deployment Details"</h4>
 
-			<div class="flex flex-col items-start justify-start w-full h-full text-white">
-				<div class="flex mb-xs w-full">
-					<div class="flex-2 flex items-center justify-start">
+			<div class="flex flex-col items-start justify-start gap-md w-full h-full text-white">
+				<div class="flex w-full">
+					<div class="w-1/6 flex items-center justify-start">
 						<label
 							html_for="name"
 							class="text-white text-sm flex items-center justify-start"
@@ -18,7 +18,7 @@ pub fn DeploymentDetails() -> impl IntoView {
 						</label>
 					</div>
 
-					<div class="flex-10 flex flex-col items-start justify-start">
+					<div class="w-5/6 flex flex-col items-start justify-start">
 						<Input
 							placeholder="Deployment Name"
 							r#type={InputType::Text}
@@ -29,14 +29,14 @@ pub fn DeploymentDetails() -> impl IntoView {
 					</div>
 				</div>
 
-				<div class="flex my-xs w-full">
-					<div class="flex-2 flex justify-start items-center">
+				<div class="flex w-full">
+					<div class="w-1/6 flex justify-start items-center">
 						<label class="text-white text-sm flex justify-start items-center">
 							"Registry"
 						</label>
 					</div>
 
-					<div class="flex-10 flex flex-col items-start justify-start">
+					<div class="w-5/6 flex flex-col items-start justify-start">
 						<Input
 							placeholder="Registry Name"
 							r#type={InputType::Text}
@@ -48,14 +48,14 @@ pub fn DeploymentDetails() -> impl IntoView {
 					</div>
 				</div>
 
-				<div class="flex my-xs w-full">
-					<div class="flex-2 flex justify-start items-center">
+				<div class="flex w-full">
+					<div class="w-1/6 flex justify-start items-center">
 						<label class="text-white text-sm flex justify-start items-center">
 							"Image Details"
 						</label>
 					</div>
 
-					<div class="flex-6 flex flex-col items-start justify-start">
+					<div class="w-1/2 flex flex-col items-start justify-start">
 						<Input
 							placeholder="Enter Repository Image Name"
 							r#type={InputType::Text}
@@ -66,7 +66,7 @@ pub fn DeploymentDetails() -> impl IntoView {
 
 					</div>
 
-					<div class="flex-4 pl-md flex flex-col items-start justify-start">
+					<div class="w-2/6 pl-md flex flex-col items-start justify-start">
 						<Input
 							r#type={InputType::Text}
 							placeholder="Choose Image Tag"
@@ -77,14 +77,14 @@ pub fn DeploymentDetails() -> impl IntoView {
 					</div>
 				</div>
 
-				<div class="flex my-xs w-full mb-md">
-					<div class="flex-2 flex justify-start items-center">
+				<div class="flex w-full">
+					<div class="w-1/6 flex justify-start items-center">
 						<label class="text-white text-sm flex justify-start items-center">
 							"Choose Runner"
 						</label>
 					</div>
 
-					<div class="flex-10 flex flex-col items-start justify-start">
+					<div class="w-5/6 flex flex-col items-start justify-start">
 						<Input
 							r#type={InputType::Text}
 							placeholder="Choose A Runner"

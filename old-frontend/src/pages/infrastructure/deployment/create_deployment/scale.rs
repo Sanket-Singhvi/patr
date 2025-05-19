@@ -20,7 +20,9 @@ pub fn ScaleDeployment() -> impl IntoView {
 					<span class="text-sm">"Choose Horizontal Scale"</span>
 				</div>
 
-				<div class="flex-10 flex flex-col justify-start items-start bg-secondary-light p-xl br-sm gap-md">
+				<div class="flex-10 flex flex-col justify-start items-start
+					bg-secondary-light p-xl br-sm gap-md rounded-sm"
+				>
 					<p class="w-full tracking-[1px] text-xxs">
 						"Choose the minimum and maximum number of instances for your deployment "
 					</p>
@@ -74,7 +76,7 @@ pub fn ScaleDeployment() -> impl IntoView {
 					<span class="text-sm">"Manage Resource Allocation"</span>
 				</div>
 
-				<div class="flex-10 flex justify-start items-center overflow-auto">
+				<div class="flex-10 flex justify-start items-center overflow-auto rounded-sm">
 					<div class="w-full p-xl rounded-sm bg-secondary-light flex flex-col items-start justify-start overflow-auto">
 						<p class="tracking-[1px] mb-lg text-xxs">
 							"Specify the resources to be allocated to your container"
