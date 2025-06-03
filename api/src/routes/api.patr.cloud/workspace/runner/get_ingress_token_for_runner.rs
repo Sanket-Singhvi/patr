@@ -149,7 +149,7 @@ pub async fn get_ingress_token_for_runner(
 		.json(&TunnelConfigRequest {
 			config: TunnelConfigRequestConfig {
 				ingress: vec![TunnelConfigRequestConfigIngress {
-					service: "unix:./data/nginx/nginx.sock".to_string(),
+					service: "unix:///var/run/patr.sock".to_string(),
 				}],
 			},
 		})

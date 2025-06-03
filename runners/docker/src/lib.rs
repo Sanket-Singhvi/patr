@@ -27,6 +27,9 @@ impl RunnerExecutor for DockerRunner {
 	type InitializedState = Docker;
 	type Settings = DockerSettings;
 
+	const REQUIRES_CLOUDFLARE_TUNNEL: bool = true;
+	const REQUIRES_NGINX_SETUP: bool = true;
+
 	async fn initialize(
 		_: &RunnerSettings<Self::Settings>,
 	) -> Result<Self::InitializedState, RunnerError> {

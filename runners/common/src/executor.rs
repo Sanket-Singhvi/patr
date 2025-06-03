@@ -18,6 +18,15 @@ pub trait RunnerExecutor: Sized {
 	/// to the [`new`][RunnerExecutor::new] function upon each instantiation.
 	type InitializedState: Clone + Send + Sync + 'static;
 
+	/// Whether the runner requires a Cloudflare Tunnel to be set up. This is
+	/// used to determine whether the runner needs to set up a Cloudflare Tunnel
+	/// to expose the deployments to the internet.
+	const REQUIRES_CLOUDFLARE_TUNNEL: bool;
+	/// Whether the runner requires Nginx to be set up. This is used to
+	/// determine whether the runner needs to set up Nginx to proxy the
+	/// deployments to the internet.
+	const REQUIRES_NGINX_SETUP: bool;
+
 	/// The internal name of the runner. This is used to identify the runner in
 	/// tracing and logs.
 	#[must_use]

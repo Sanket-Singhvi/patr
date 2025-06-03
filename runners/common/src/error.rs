@@ -43,7 +43,7 @@ pub enum RunnerError {
 	NginxExecError(io::Error),
 	/// There was an error while setting up the Cloudflare Tunnel
 	#[error("error setting up Cloudflare Tunnel: {0}")]
-	CloudflareTunnelSetupError(io::Error),
+	CloudflareTunnelSetupError(String),
 	/// There was an error while running the Cloudflare Tunnel
 	#[error("error running Cloudflare Tunnel: {0}")]
 	CloudflareTunnelExecError(io::Error),

@@ -13,6 +13,7 @@ use futures::{
 	future::{self, Either},
 };
 use models::{api::workspace::runner::*, utils::WebSocketUpgrade};
+use nix::unistd::Uid;
 use tempfile::TempDir;
 use tokio::{
 	fs,
@@ -182,13 +183,13 @@ where
 					.data,
 			)
 			.await
-			.map_err(RunnerError::CloudflareTunnelSetupError)?;
+			.map_err(|err| RunnerError::CloudflareTunnelSetupError(err.to_string()))?;
 			fs::set_permissions(
 				self.temp_dir.path().join("cloudflared"),
 				Permissions::from_mode(0o755),
 			)
 			.await
-			.map_err(RunnerError::CloudflareTunnelSetupError)?;
+			.map_err(|err| RunnerError::CloudflareTunnelSetupError(err.to_string()))?;
 
 			// Write the nginx binary to the temp directory
 			fs::write(
@@ -207,11 +208,12 @@ where
 			.map_err(RunnerError::NginxSetupError)?;
 		}
 
-		let (server_setup, sync_database, run_tunnel, run_nginx, resource_monitor) = future::join5(
+		self.setup_cloudflare_tunnel().await?;
+		self.setup_nginx().await?;
+
+		let (server_setup, sync_database, resource_monitor) = future::join3(
 			self.run_server(tcp_listener),
 			self.sync_local_database(),
-			self.run_cloudflare_tunnel(),
-			self.run_nginx(),
 			self.monitor_resources(receiver),
 		)
 		.await;
@@ -228,10 +230,7 @@ where
 		}
 
 		info!("Server exited. Exiting runner");
-		sync_database
-			.or(run_tunnel)
-			.or(run_nginx)
-			.or(resource_monitor)
+		sync_database.or(resource_monitor)
 	}
 
 	/// Run the server. This function will start the server and listen for
@@ -392,7 +391,7 @@ where
 	/// with the error if the tunnel fails to start. The tunnel will run until
 	/// the exit signal is received.
 	#[instrument(skip(self))]
-	async fn run_cloudflare_tunnel(&self) -> Result<!, RunnerError> {
+	async fn setup_cloudflare_tunnel(&self) -> Result<(), RunnerError> {
 		let RunnerMode::Managed {
 			workspace_id,
 			runner_id,
@@ -400,196 +399,117 @@ where
 			user_agent,
 		} = self.state.config.mode.clone()
 		else {
-			// If the runner is running in self-hosted mode, return early. The run function
-			// uses a join of all the futures so early return here will not stop the runner
-			// from running
-			debug!("Runner is running in self-hosted mode. Skipping cloudflare tunnel");
-			return Err(RunnerError::Unsupported);
+			// If the runner is running in self-hosted mode, return early.
+			debug!("Runner is running in self-hosted mode. Skipping cloudflare tunnel setup");
+			return Ok(());
 		};
 
 		info!("Running cloudflare tunnel to expose the runner");
-		loop {
-			let tunnel_token = make_request(
-				ApiRequest::<GetIngressTokenForRunnerRequest>::builder()
-					.path(GetIngressTokenForRunnerPath {
-						workspace_id,
-						runner_id,
-					})
-					.query(())
-					.headers(GetIngressTokenForRunnerRequestHeaders {
-						authorization: api_token.clone(),
-						user_agent: user_agent.clone(),
-					})
-					.body(GetIngressTokenForRunnerRequest)
-					.build(),
-			)
-			.with_cancel_check()
-			.await?;
-
-			let Ok(tunnel_token) = tunnel_token
-				.inspect_err(|err| {
-					error!("Failed to connect to the server: {:?}", err);
-					error!("Retrying in 5 second");
+		let tunnel_token = make_request(
+			ApiRequest::<GetIngressTokenForRunnerRequest>::builder()
+				.path(GetIngressTokenForRunnerPath {
+					workspace_id,
+					runner_id,
 				})
-				.map_err(|err| err.body)
-			else {
-				// Retry after 5 seconds, but break if the exit signal is received
-				time::sleep(Duration::from_secs(5))
-					.with_cancel_check()
-					.await?;
-				continue;
-			};
-
-			let Ok(mut child) = Command::new("cloudflared")
-				.arg("tunnel")
-				.arg("--logfile")
-				.arg("./data/cloudflared.log")
-				.arg("run")
-				.arg("--token")
-				.arg(tunnel_token.body.token)
-				.env(
-					"PATH",
-					format!(
-						"{}:{}",
-						self.temp_dir.path().display(),
-						std::env::var("PATH").unwrap_or_default()
-					),
-				)
-				.stdin(Stdio::piped())
-				.stdout(Stdio::piped())
-				.stderr(Stdio::piped())
-				.kill_on_drop(true)
-				.spawn()
-				.inspect_err(|err| {
-					error!("Failed to start cloudflare tunnel: {:?}", err);
-					error!("Retrying in 5 second");
+				.query(())
+				.headers(GetIngressTokenForRunnerRequestHeaders {
+					authorization: api_token.clone(),
+					user_agent: user_agent.clone(),
 				})
-			else {
-				// Retry after 5 seconds, but break if the exit signal is received
-				time::sleep(Duration::from_secs(5))
-					.with_cancel_check()
-					.await?;
-				continue;
-			};
+				.body(GetIngressTokenForRunnerRequest)
+				.build(),
+		)
+		.with_cancel_check()
+		.await?
+		.map_err(|err| RunnerError::CloudflareTunnelSetupError(err.body.message))?;
 
-			let status = match child.wait().with_cancel_check().await {
-				Ok(status) => status,
-				Err(err) => {
-					// Exit signal received. Kill the child process and exit
-					child
-						.kill()
-						.await
-						.map_err(RunnerError::CloudflareTunnelExecError)?;
-					child
-						.wait()
-						.await
-						.map_err(RunnerError::CloudflareTunnelExecError)?;
-					return Err(err);
-				}
-			};
-
-			let Ok(status) = status.inspect_err(|err| {
-				error!("Error waiting for cloudflared process: {}", err);
-				error!("Retrying in 5 second");
-			}) else {
-				// Retry after 5 seconds, but break if the exit signal is received
-				if let Err(RunnerError::ExitSignalReceived) = time::sleep(Duration::from_secs(5))
-					.with_cancel_check()
-					.await
-				{
-					// Exit signal received. Kill the child process and exit
-					child
-						.kill()
-						.await
-						.map_err(RunnerError::CloudflareTunnelExecError)?;
-					child
-						.wait()
-						.await
-						.map_err(RunnerError::CloudflareTunnelExecError)?;
-					return Err(RunnerError::ExitSignalReceived);
-				}
-				continue;
-			};
-
-			if status.success() {
-				warn!("Cloudflare tunnel exited successfully");
-				future::ready(()).with_cancel_check().await?;
-				warn!("This should not happen. Restarting tunnel");
-			} else {
-				error!("Cloudflare tunnel exited with status: {}", status);
-				error!("Retrying in 1 second");
-				// Retry after a second, but break if the exit signal is received
-				time::sleep(Duration::from_secs(1))
-					.with_cancel_check()
-					.await?;
-			}
+		if !Uid::effective().is_root() {
+			println!("{}", tunnel_token.body.token);
+			eprintln!(
+				"Running cloudflare tunnel as non-root user. This may cause issues with the tunnel"
+			);
+			return Err(RunnerError::CloudflareTunnelSetupError(
+				"Please run the runner as root or use sudo to run the runner as root".to_string(),
+			));
 		}
+
+		let output = Command::new("cloudflared")
+			.arg("--version")
+			.stdin(Stdio::piped())
+			.stdout(Stdio::piped())
+			.stderr(Stdio::piped())
+			.output()
+			.await
+			.map_err(|err| {
+				error!("Failed to run cloudflare tunnel: {:?}", err);
+				RunnerError::CloudflareTunnelSetupError(err.to_string())
+			})?;
+
+		if !output.status.success() {
+			return Err(RunnerError::CloudflareTunnelSetupError(
+				"cloudflared binary not found".to_string(),
+			));
+		}
+
+		let output = Command::new("sudo")
+			.arg("cloudflared")
+			.arg("service")
+			.arg("install")
+			.arg(tunnel_token.body.token)
+			.stdin(Stdio::piped())
+			.stdout(Stdio::piped())
+			.stderr(Stdio::piped())
+			.output()
+			.await
+			.map_err(|err| {
+				error!("Failed to start cloudflare tunnel: {:?}", err);
+				RunnerError::CloudflareTunnelSetupError(err.to_string())
+			})?;
+
+		if output.status.success() {
+			info!("Cloudflare tunnel service installed successfully");
+		} else {
+			return Err(RunnerError::CloudflareTunnelSetupError(format!(
+				"Failed to start cloudflare tunnel: {}",
+				String::from_utf8_lossy(&output.stderr)
+			)));
+		}
+
+		Ok(())
 	}
 
 	/// Run nginx. This function will start nginx and listen for incoming
 	/// connections. It will return a result with the error if nginx fails
 	/// to start. Nginx will run until the exit signal is received.
 	#[instrument(skip(self))]
-	async fn run_nginx(&self) -> Result<!, RunnerError> {
-		fs::create_dir_all("./data/nginx")
+	async fn setup_nginx(&self) -> Result<(), RunnerError> {
+		if !fs::try_exists("/etc/nginx/sites-enabled")
 			.await
-			.map_err(RunnerError::NginxSetupError)?;
+			.map_err(RunnerError::NginxSetupError)?
+		{
+			fs::create_dir_all("/etc/nginx/sites-enabled")
+				.await
+				.map_err(RunnerError::NginxSetupError)?;
+		}
 
 		fs::write(
-			"./data/nginx/nginx.conf",
-			include_str!(concat!(
-				env!("CARGO_MANIFEST_DIR"),
-				"/../../assets/runner/nginx.conf"
-			)),
+			format!(
+				"/etc/nginx/sites-enabled/patr-{}.conf",
+				self.state.config.mode.get_runner_id()
+			),
+			format!(
+				include_str!(concat!(
+					env!("CARGO_MANIFEST_DIR"),
+					"/../../assets/runner/server-conf.conf"
+				)),
+				server_name = "_",
+				port = self.state.config.bind_address.port()
+			),
 		)
 		.await
 		.map_err(RunnerError::NginxSetupError)?;
 
-		loop {
-			// TODO: remove the nginx socket file if it exists based on a lockfile
-
-			let Ok(mut child) = Command::new("nginx")
-				.arg("-g")
-				.arg("daemon off;")
-				.arg("-p")
-				.arg(".")
-				.arg("-e")
-				.arg("./data/nginx/error.log")
-				.arg("-c")
-				.arg("./data/nginx/nginx.conf")
-				.env(
-					"PATH",
-					format!(
-						"{}:{}",
-						self.temp_dir.path().display(),
-						std::env::var("PATH").unwrap_or_default()
-					),
-				)
-				.stdin(Stdio::piped())
-				.stdout(Stdio::piped())
-				.stderr(Stdio::piped())
-				.kill_on_drop(true)
-				.spawn()
-				.inspect_err(|err| {
-					error!("Failed to start nginx: {:?}", err);
-				})
-			else {
-				// Retry after 5 seconds, but break if the exit signal is received
-				time::sleep(Duration::from_secs(5))
-					.with_cancel_check()
-					.await?;
-				continue;
-			};
-
-			let status = child.wait().await.map_err(RunnerError::NginxExecError)?;
-
-			if status.success() {
-				warn!("Nginx exited successfully");
-				warn!("This should not happen. Restarting nginx");
-			} else {
-				error!("Nginx exited with status: {}", status);
-			}
-		}
+		Ok(())
 	}
 
 	/// Monitor the resources and make sure that they are running. This function
