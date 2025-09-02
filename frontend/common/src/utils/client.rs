@@ -31,6 +31,7 @@ pub static API_CALL_REGISTRY: ApiCallRegistryData = OnceLock::new();
 /// call this function with the request and you'll get a response. All the
 /// layering is automatically done. You don't need to do anything. The
 /// registering of all APIs is done by the RouterExt trait in the backend
+#[expect(dead_code)]
 pub(crate) async fn make_api_call<E>(request: ApiRequest<E>) -> Result<AppResponse<E>, ErrorType>
 where
 	E: ApiEndpoint,
